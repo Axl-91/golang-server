@@ -2,50 +2,26 @@ package main
 
 import (
 	"fmt"
+	"go-server/controllers"
+	"go-server/structs"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-func formHandler(writer http.ResponseWriter, req *http.Request) {
-	if req.URL.Path != "/form" {
-		http.Error(writer, "404 not found", http.StatusNotFound)
-		return
-	}
-
-	if err := req.ParseForm(); err != nil {
-		fmt.Fprintf(writer, "ParseForm() err: %v", err)
-		return
-	}
-	fmt.Fprintf(writer, "POST request succesful\n")
-	name := req.FormValue("name")
-	address := req.FormValue("address")
-
-	fmt.Fprintf(writer, "Name = %s\n", name)
-	fmt.Fprintf(writer, "Address = %s\n", address)
-}
-
-func helloHandler(writer http.ResponseWriter, req *http.Request) {
-	if req.URL.Path != "/hello" {
-		http.Error(writer, "404 not found", http.StatusNotFound)
-		return
-	}
-
-	if req.Method != "GET" {
-		http.Error(writer, "Method not supported", http.StatusNotFound)
-		return
-	}
-	fmt.Fprintf(writer, "Hello!")
-}
-
 func main() {
-	fileServer := http.FileServer(http.Dir("./static"))
-	http.Handle("/", fileServer)
-	http.HandleFunc("/form", formHandler)
-	http.HandleFunc("/hello", helloHandler)
+	route := mux.NewRouter()
 
-	fmt.Printf("Starting server at port 8080\n")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatal(err)
-	}
+	structs.InitMovies()
+
+	route.HandleFunc("/movies", controllers.GetMovies).Methods("GET")
+	route.HandleFunc("/movies/{id}", controllers.GetMovie).Methods("GET")
+	route.HandleFunc("/movies", controllers.CreateMovie).Methods("POST")
+	route.HandleFunc("/movies/{id}", controllers.UpdateMovie).Methods("PUT")
+	route.HandleFunc("/movies/{id}", controllers.DeleteMovie).Methods("DELETE")
+
+	fmt.Printf("Starting server at port 8000\n")
+	log.Fatal(http.ListenAndServe(":8000", route))
 
 }
