@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
 	"go-server/controllers"
 	"go-server/structs"
 	"log"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 func main() {
